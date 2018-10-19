@@ -5,4 +5,5 @@ you can also add your signature if you want by drawing it with your mouse or tou
 by unchecking the checkbox above it :).
 
 The front end is built over a form template you can find in this address: https://codepen.io/colorlib/pen/rxddKy
+
 The front end signature pad is copied from this codepen page: https://codepen.io/kunukn/pen/kkbNvx
