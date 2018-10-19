@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PDF Creater</title>
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+  <link rel="stylesheet" type="text/css" href="css/signature.css">
+</head>
+<body>
+
+<div class="login-page">
+  <div class="form" style="margin-bottom:20px;height:80px">
+    <h1 style="line-height:80px">Make your PDF</h1>
+  </div>
+  
+  <div class="form">
+    <form id="pdf-form" class="login-form">
+
+      <div id="fields">
+
+        <div class="field field1">
+          <input name="title1" type="text" placeholder="enter field name here"/>
+          <textarea name="content1" placeholder="content goes here"></textarea>
+        </div>
+
+
+      </div>
+        
+
+      <div class="new-field" onclick="add_field()">
+        +
+      </div><br><br><br>
+
+      <div style="overflow:auto">
+        <input type="checkbox" id="is-signature" checked style="float:left;height:20px;width:auto;margin:0 10px;">
+        <label for="is-signature" style="float: left;">Add Your Signature?</label>
+      </div><br>
+      
+      <div id="canvas" class="showen">
+        <label for="exampleTextarea"> Draw your Signature with Mouse or Touch*</label> 
+        <div style="border:solid black 1px;margin-bottom:5px;height:200px;background:#0095ff">
+          <canvas name="data" id="signature-pad" width="400" height="200" style="background:lightblue;border:.1px solid blue;border-bottom:none;max-width:80%;min-height:200px"></canvas>
+        </div>
+        <button class="canvas-btn" id="clear">Clear</button>
+        <button class="canvas-btn" id="save">Save as Image</button>
+      </div>
+        
+      
+      <br><br>
+      <button id="submit" type="submit">Make PDF</button>
+
+    </form>
+  </div>
+</div>
+
+<script type="text/javascript">
+
+  i = 0;
+  function add_field(){
+    i++
+
+    var formBody = $("#fields");    
+    var newFieldNum = i +1;
+
+    var newField = '<div class="field field'+newFieldNum+'"><input name="title'+newFieldNum+'" type="text" placeholder="enter field name here"/><textarea name="content'+newFieldNum+'" placeholder="content goes here"></textarea><div class="remove" onclick="removeField('+newFieldNum+')">X</div></div>';
+
+    formBody.append( newField );
+  }
+
+  function removeField(num){
+    field = document.getElementsByClassName("field"+num)[0];
+    field.remove();
+  }
+</script>
+
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js'></script>
+<script type="text/javascript" src="js/draw-signature.js"></script>
+
+<script type="text/javascript">
+
+  var checkbox = $('#is-signature');
+  var canvasDiv = $('#canvas');
+  checkbox.on('change', function (event) {
+    if ( $(this).is(":checked") ) canvasDiv.addClass('showen');
+    else canvasDiv.removeClass('showen');
+  });
+
+  $('#save').click(function(event){
+    canvas = document.getElementById('signature-pad');
+    $.post("make_pdf.php", {save:'save',canvas: canvas.toDataURL("image/png")},function(data){document.location = "make_pdf.php?save";});
+  });
+
+  $('button').on('click', function (event) {
+    event.preventDefault();
+  });
+  $('#pdf-form #submit').on('click', makePdf);
+
+    function makePdf(event) {
+
+      // event.preventDefault();
+
+      submit = 'submit';
+      inputs = [];
+      textareas = [];
+
+      input = $('input');
+      textarea = $('textarea');
+      var signature = (canvasDiv.is('.showen')) ? document.getElementById('signature-pad').toDataURL("image/png"): 0;
+
+      for(i=0; i<input.length; i++ ){
+        if (input.eq(i).val()=='' || textarea.eq(i).val() ==""){
+          alert("you can't leave a field empty you can delete the field if you want");
+          return false;
+        }
+        if (input.eq(i).attr("type")=="checkbox") continue;
+        inputs.push(input.eq(i).val());
+        textareas.push(textarea.eq(i).val());
+      }
+
+      
+
+      $.ajax({
+        type: "POST",
+        url:"make_pdf.php",
+        data:{
+          submit: submit,
+          titles: inputs,
+          subjects: textareas,
+          canvas : signature
+        },
+        success:function(data){
+          
+        },
+
+      });
+      
+  }
+</script>
+</body>
+</html>
